@@ -1,20 +1,27 @@
 <?php
-/**
- * Shared database connection.
- * Adjust host/dbname/user/pass to match your existing app's config.
- * If you already have a db connection file, just replace the include
- * path in the other files to point to yours instead of this one.
- */
-
-$host   = "localhost";
-$dbname = "student_system"; // <-- change to your actual DB name
-$user   = "root";           // <-- change to your actual DB user
-$pass   = "";                // <-- change to your actual DB password
+/* Database Connection */
+$host = "localhost";
+$dbname = "school_db";
+$user = "root";
+$password = "";
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    $pdo = new PDO(
+        "mysql:host=$host;dbname=$dbname;charset=utf8",
+        $user,
+        $password
+    );
+    $pdo->setAttribute(
+        PDO::ATTR_ERRMODE,
+        PDO::ERRMODE_EXCEPTION
+    );
 } catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+    header("Content-Type: application/json");
+    http_response_code(500);
+    echo json_encode([
+        "success" => false,
+        "message" => "Database connection failed.",
+        "error" => $e->getMessage()
+    ]);
+    exit;
 }
