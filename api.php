@@ -1,5 +1,3 @@
-
-Api · PHP
 <?php
 /* ============================================
    Student Loan Management System - API Router
@@ -11,27 +9,27 @@ Api · PHP
      GET  api.php?endpoint=payments&loan_id=1  -> payments for a loan
      POST api.php?endpoint=payments       -> add payment
    ============================================ */
- 
+
 header("Content-Type: application/json");
 include "db.php";
- 
+
 $method   = $_SERVER['REQUEST_METHOD'];
 $endpoint = $_GET['endpoint'] ?? 'students';
- 
+
 switch ($endpoint) {
- 
+
     case "students":
         handleStudents($pdo, $method);
         break;
- 
+
     case "loans":
         handleLoans($pdo, $method);
         break;
- 
+
     case "payments":
         handlePayments($pdo, $method);
         break;
- 
+
     default:
         http_response_code(404);
         echo json_encode([
@@ -40,13 +38,13 @@ switch ($endpoint) {
         ]);
         break;
 }
- 
- 
+
+
 /* ============================================
    STUDENTS
    ============================================ */
 function handleStudents($pdo, $method) {
- 
+
     if ($method !== "GET") {
         http_response_code(405);
         echo json_encode([
@@ -55,60 +53,69 @@ function handleStudents($pdo, $method) {
         ]);
         return;
     }
- 
+
     $stmt = $pdo->query("SELECT id, name, email, course FROM students");
     echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
 }
- 
- 
+
+
 /* ============================================
    LOANS
    ============================================ */
 function handleLoans($pdo, $method) {
- 
+
     switch ($method) {
- 
+
         case "GET":
+            $loanColumns = "id AS loan_id, student_id, loan_amount, loan_type, status, created_at";
             if (isset($_GET['student_id'])) {
                 $stmt = $pdo->prepare(
-                    "SELECT * FROM loans WHERE student_id = ?"
+                    "SELECT $loanColumns FROM loans WHERE student_id = ?"
                 );
                 $stmt->execute([$_GET['student_id']]);
             } else {
-                $stmt = $pdo->query("SELECT * FROM loans");
+                $stmt = $pdo->query("SELECT $loanColumns FROM loans");
             }
             echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
             break;
- 
+
         case "POST":
             $data = json_decode(file_get_contents("php://input"), true);
- 
+
             $error = validateLoanInput($data);
             if ($error) {
                 http_response_code(400);
                 echo json_encode(["success" => false, "message" => $error]);
                 return;
             }
- 
-            $stmt = $pdo->prepare(
-                "INSERT INTO loans
-                (student_id, loan_amount, loan_type, status)
-                VALUES (?, ?, ?, ?)"
-            );
-            $stmt->execute([
-                $data['student_id'],
-                $data['loan_amount'],
-                $data['loan_type'],
-                $data['status']
-            ]);
- 
-            echo json_encode([
-                "success" => true,
-                "message" => "Loan added successfully",
-                "loan_id" => $pdo->lastInsertId()
-            ]);
+
+            try {
+                $stmt = $pdo->prepare(
+                    "INSERT INTO loans
+                    (student_id, loan_amount, loan_type, status)
+                    VALUES (?, ?, ?, ?)"
+                );
+                $stmt->execute([
+                    $data['student_id'],
+                    $data['loan_amount'],
+                    $data['loan_type'],
+                    $data['status']
+                ]);
+
+                echo json_encode([
+                    "success" => true,
+                    "message" => "Loan added successfully",
+                    "loan_id" => $pdo->lastInsertId()
+                ]);
+            } catch (PDOException $e) {
+                http_response_code(500);
+                echo json_encode([
+                    "success" => false,
+                    "message" => "Could not save loan. Check student_id exists and values are valid."
+                ]);
+            }
             break;
- 
+
         default:
             http_response_code(405);
             echo json_encode([
@@ -117,7 +124,7 @@ function handleLoans($pdo, $method) {
             ]);
     }
 }
- 
+
 function validateLoanInput($data) {
     if (empty($data['student_id'])) {
         return "student_id is required.";
@@ -133,15 +140,15 @@ function validateLoanInput($data) {
     }
     return null;
 }
- 
- 
+
+
 /* ============================================
    PAYMENTS
    ============================================ */
 function handlePayments($pdo, $method) {
- 
+
     switch ($method) {
- 
+
         case "GET":
             if (isset($_GET['loan_id'])) {
                 $stmt = $pdo->prepare(
@@ -153,36 +160,44 @@ function handlePayments($pdo, $method) {
             }
             echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
             break;
- 
+
         case "POST":
             $data = json_decode(file_get_contents("php://input"), true);
- 
+
             $error = validatePaymentInput($data);
             if ($error) {
                 http_response_code(400);
                 echo json_encode(["success" => false, "message" => $error]);
                 return;
             }
- 
-            $stmt = $pdo->prepare(
-                "INSERT INTO payments
-                (loan_id, payment_amount, payment_date, payment_method)
-                VALUES (?, ?, ?, ?)"
-            );
-            $stmt->execute([
-                $data['loan_id'],
-                $data['payment_amount'],
-                $data['payment_date'],
-                $data['payment_method']
-            ]);
- 
-            echo json_encode([
-                "success" => true,
-                "message" => "Payment added successfully",
-                "payment_id" => $pdo->lastInsertId()
-            ]);
+
+            try {
+                $stmt = $pdo->prepare(
+                    "INSERT INTO payments
+                    (loan_id, payment_amount, payment_date, payment_method)
+                    VALUES (?, ?, ?, ?)"
+                );
+                $stmt->execute([
+                    $data['loan_id'],
+                    $data['payment_amount'],
+                    $data['payment_date'],
+                    $data['payment_method']
+                ]);
+
+                echo json_encode([
+                    "success" => true,
+                    "message" => "Payment added successfully",
+                    "payment_id" => $pdo->lastInsertId()
+                ]);
+            } catch (PDOException $e) {
+                http_response_code(500);
+                echo json_encode([
+                    "success" => false,
+                    "message" => "Could not save payment. Check loan_id exists and values are valid."
+                ]);
+            }
             break;
- 
+
         default:
             http_response_code(405);
             echo json_encode([
@@ -191,7 +206,7 @@ function handlePayments($pdo, $method) {
             ]);
     }
 }
- 
+
 function validatePaymentInput($data) {
     if (empty($data['loan_id'])) {
         return "loan_id is required.";
@@ -207,4 +222,3 @@ function validatePaymentInput($data) {
     }
     return null;
 }
- 
