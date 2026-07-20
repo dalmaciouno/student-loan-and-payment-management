@@ -1,14 +1,15 @@
 <?php
+/* Database Connection */
 
 $host = "localhost";
+$dbname = "school_db";
 $user = "root";
 $password = "";
-$database = "school_db";
 
 try {
 
     $pdo = new PDO(
-        "mysql:host=$host;dbname=$database",
+        "mysql:host=$host;dbname=$dbname;charset=utf8",
         $user,
         $password
     );
@@ -18,13 +19,17 @@ try {
         PDO::ERRMODE_EXCEPTION
     );
 
-} catch(PDOException $e){
+} catch (PDOException $e) {
+
+    http_response_code(500);
 
     echo json_encode([
+        "success" => false,
+        "message" => "Database connection failed.",
         "error" => $e->getMessage()
     ]);
 
     exit;
-}
 
+}
 ?>
