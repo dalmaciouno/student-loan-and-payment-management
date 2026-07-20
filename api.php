@@ -1,13 +1,13 @@
 <?php
 /**
  * Simple CRUD API for managing students in a school database.
- * 
+ *
  * This API supports the following operations:
  * - GET: Retrieve all students
  * - POST: Add a new student
  * - PUT: Update an existing student
  * - DELETE: Remove a student
- * 
+ *
  * The API returns JSON responses and handles CORS for cross-origin requests.
  */
 header("Content-Type: application/json");
@@ -15,10 +15,31 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type");
 
+// Loan and Payment API routes
+
+$endpoint = $_GET['endpoint'] ?? '';
+
+if ($endpoint == "loans") {
+
+    require "loans.php";
+    exit;
+
+}
+
+
+if ($endpoint == "payments") {
+
+    require "payments.php";
+    exit;
+
+}
+
+
 $host = "db";
-$user = "root"; 
-$pass = "rootpassword"; 
+$user = "root";
+$pass = "rootpassword";
 $dbname = "school_db";
+
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $user, $pass); // Create a new PDO instance for database connection
@@ -29,7 +50,9 @@ try {
     exit;
 }
 
+
 $method = $_SERVER['REQUEST_METHOD']; // Get the HTTP request method
+
 
 // Handle the request based on the HTTP method
 // HTTP methods are used to perform different operations on the server. Each case corresponds to a CRUD operation.
@@ -40,14 +63,15 @@ switch ($method) {
         echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
         break;
 
+
     case 'POST':
         // CREATE: Add a new student
         $data = json_decode(file_get_contents("php://input"), true);
         if (!empty($data['name']) && !empty($data['email']) && !empty($data['course'])) {
             $stmt = $pdo->prepare("INSERT INTO students (name, email, course) VALUES (?, ?, ?)");
             $stmt->execute([
-                $data['name'], 
-                $data['email'], 
+                $data['name'],
+                $data['email'],
                 $data['course']
             ]);
             echo json_encode(["message" => "Student added successfully!"]);
@@ -56,15 +80,16 @@ switch ($method) {
         }
         break;
 
+
     case 'PUT':
         // UPDATE: Modify an existing student
         $data = json_decode(file_get_contents("php://input"), true);
         if (!empty($data['id']) && !empty($data['name']) && !empty($data['email']) && !empty($data['course'])) {
             $stmt = $pdo->prepare("UPDATE students SET name = ?, email = ?, course = ? WHERE id = ?");
             $stmt->execute([
-                $data['name'], 
-                $data['email'], 
-                $data['course'], 
+                $data['name'],
+                $data['email'],
+                $data['course'],
                 $data['id']
             ]);
             echo json_encode(["message" => "Student updated successfully!"]);
@@ -72,6 +97,7 @@ switch ($method) {
             echo json_with_code(["error" => "Invalid data provided"], 400);
         }
         break;
+
 
     case 'DELETE':
         // DELETE: Remove a student
@@ -85,10 +111,12 @@ switch ($method) {
         }
         break;
 
+
     default:
         echo json_with_code(["error" => "Method not allowed"], 405);
         break;
 }
+
 
 /**
  * Helper function to return JSON response with a specific HTTP status code.
@@ -102,3 +130,4 @@ function json_with_code($data, $code) {
     return json_encode($data);
 }
 ?>
+
