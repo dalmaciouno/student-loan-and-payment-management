@@ -39,22 +39,3 @@ CREATE TABLE payments (
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
--- Sample Students
-INSERT INTO students (name, email, course)
-VALUES
-('Juan Dela Cruz', 'juan@email.com', 'BS Computer Science'),
-('Maria Santos', 'maria@email.com', 'BS Information Technology');
-
--- Sample Loans
-INSERT INTO loans (student_id, loan_amount, loan_type, status)
-VALUES
-(1, 15000.00, 'Tuition', 'Approved'),
-(1, 5000.00, 'Books', 'Pending'),
-(2, 10000.00, 'Living Expenses', 'Disbursed');
-
--- Sample Payments
-INSERT INTO payments (loan_id, payment_amount, payment_date, payment_method)
-VALUES
-(1, 3000.00, '2026-07-20', 'Cash'),
-(1, 2000.00, '2026-08-05', 'Online Payment'),
-(3, 1500.00, '2026-08-10', 'Bank Transfer');
