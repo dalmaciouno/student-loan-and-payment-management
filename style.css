@@ -3,7 +3,6 @@ body {
   background: #f4f6f9;
   margin: 30px;
 }
-
 .container {
   width: 95%;
   margin: auto;
@@ -12,56 +11,46 @@ body {
   border-radius: 10px;
   box-shadow: 0 2px 8px gray;
 }
-
 h2 {
   text-align: center;
 }
-
 input,
 select {
   padding: 10px;
   margin: 5px;
 }
-
 button {
   padding: 10px 15px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
 }
-
 .save {
   background: #28a745;
   color: white;
 }
-
 .btn-loans {
   background: #17a2b8;
   color: white;
 }
-
 .btn-payment {
   background: #6f42c1;
   color: white;
 }
-
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
 }
-
 th {
   background: #007bff;
   color: white;
 }
-
 td,
 th {
   border: 1px solid #ddd;
   padding: 12px;
 }
-
 .section {
   display: none;
   margin-top: 30px;
