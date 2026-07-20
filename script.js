@@ -1,5 +1,4 @@
-console.log("script.js is running");
-const API = "http://localhost:8082/api.php";
+const API = "api.php";
 
 let currentStudent = null;
 let currentLoan = null;
