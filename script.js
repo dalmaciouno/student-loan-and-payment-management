@@ -1,4 +1,4 @@
-const API = "http://localhost/student-loan-and-payment-management/api.php";
+const API = "http://localhost:8082/api.php";
 
 let currentStudent = null;
 
